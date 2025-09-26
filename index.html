@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Configurações básicas da página -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Identificação de Coletores de Rejeito</title>
+    <style>
+        /* Estilos CSS mantidos exatamente como fornecidos */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f4f7f9 0%, #e2e8f0 100%);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        header {
+            background: linear-gradient(135deg, #035ef1 0%, #3b82f6 100%);
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 4px solid #60a5fa;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.05;
+        }
+        header img.logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        header p {
+            margin: 10px 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .intro {
+            padding: 40px 30px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .intro h2 {
+            color: #1f2937;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .intro h2::before {
+            content: '📋';
+            font-size: 1.2em;
+        }
+        .intro p {
+            margin: 15px 0;
+            font-size: 1.05em;
+            color: #4b5563;
+        }
+        .intro strong {
+            color: #1f2937;
+        }
+        .form-section {
+            padding: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .form-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .form-section h2::before {
+            content: '➕';
+            font-size: 1.2em;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+        input:focus, select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        .valid-message {
+            color: #10b981;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 10px 20px;
+            font-size: 0.95em;
+            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        .edit-btn {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            padding: 10px 20px;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);
+        }
+        .edit-btn:hover {
+            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            padding: 10px 20px;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+        }
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+        .table-section {
+            padding: 30px;
+        }
+        .table-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .table-section h2::before {
+            content: '📊';
+            font-size: 1.2em;
+        }
+        .search-group {
+            margin-bottom: 30px;
+        }
+        .search-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        #searchImei {
+            width: 400px;
+            max-width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        tr:hover {
+            background-color: #eff6ff;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        .no-data, .no-results {
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            padding: 60px 20px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 2px dashed #d1d5db;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close:hover {
+            color: #000;
+        }
+        #loginSection {
+            padding: 20px 30px;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        #loginForm {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        #loginForm .form-group {
+            margin: 0;
+        }
+        #loginForm input {
+            width: 180px;
+            padding: 10px;
+        }
+        #loginForm button {
+            padding: 10px 20px;
+        }
+        footer {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: #fff;
+            padding: 25px;
+            text-align: center;
+            border-top: 4px solid #3b82f6;
+        }
+        footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 12px;
+                margin: 0;
+            }
+            table, th, td {
+                font-size: 0.85em;
+                padding: 12px 8px;
+            }
+            #searchImei {
+                width: 100%;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+                padding: 20px;
+            }
+            #loginForm {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+            }
+            #loginForm input {
+                width: 100%;
+                max-width: 200px;
+            }
+            header img.logo {
+                max-width: 120px;
+            }
+            .intro, .form-section, .table-section {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            table {
+                font-size: 0.8em;
+            }
+            th, td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Seção de Login no topo -->
+        <section id="loginSection">
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Usuário" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Senha" required>
+                </div>
+                <button type="submit">Entrar</button>
+                <button type="button" id="logoutBtn" style="display: none;">Sair</button>
+            </form>
+        </section>
+
+        <!-- Cabeçalho do sistema -->
+        <header>
+            <img src="./logo.ico" alt="Logo do Sistema" class="logo">
+            <h1>SIC - Sistema de Identificação de Coletores CDC</h1>
+            <p>Gerencie os PDAs por setor, utilizando IMEI para identificação única.</p>
+        </header>
+
+        <!-- Seção introdutória -->
+        <section class="intro">
+            <h2>Descrição do Sistema</h2>
+            <p>Este sistema foi desenvolvido para gerenciar a identificação de coletores da Descarregamento, Inbound, Consolidação, Rejeito, Expedição e Outros, garantindo o controle eficiente dos equipamentos (PDAs) utilizados em cada setor da operação.</p>
+            <p>O objetivo é assegurar que todos os equipamentos sejam registrados com base em seu número de IMEI, permitindo a rastreabilidade e a responsabilização por setor. Isso reduz divergências operacionais e promove o zelo pelos equipamentos, com informações compartilhadas entre turnos.</p>
+            <p><strong>Setores disponíveis:</strong> Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Outros.</p>
+        </section>
+
+        <!-- Formulário para adicionar um novo PDA -->
+        <section class="form-section">
+            <h2>Adicionar Novo PDA</h2>
+            <form id="pdaForm">
+                <div class="form-group">
+                    <label for="imei">IMEI (obrigatório, único):</label>
+                    <input type="text" id="imei" required pattern="[0-9]{15}" title="IMEI deve ter 15 dígitos numéricos" maxlength="15">
+                    <div class="error-message" id="imeiError">IMEI já cadastrado! Use um IMEI único.</div>
+                    <div class="valid-message" id="imeiValid">IMEI válido e disponível.</div>
+                </div>
+                <div class="form-group">
+                    <label for="setor">Setor:</label>
+                    <select id="setor" required>
+                        <option value="">Selecione o setor</option>
+                        <option value="Descarregamento">Descarregamento</option>
+                        <option value="Inbound">Inbound</option>
+                        <option value="Consolidação">Consolidação</option>
+                        <option value="Rejeito">Rejeito</option>
+                        <option value="Expedição">Expedição</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                        <option value="Em Manutenção">Em Manutenção</option>
+                        <option value="Quebrado">Quebrado</option>
+                    </select>
+                </div>
+                <button type="submit" id="addBtn">Adicionar PDA</button>
+            </form>
+        </section>
+
+        <!-- Seção da tabela para listar PDAs -->
+        <section class="table-section">
+            <h2>Lista de PDAs Identificados</h2>
+            
+            <!-- Campo de busca por IMEI -->
+            <div class="search-group">
+                <label for="searchImei">Buscar por IMEI:</label>
+                <input type="text" id="searchImei" placeholder="Digite o IMEI para buscar..." maxlength="15">
+            </div>
+            
+            <table id="pdaTable">
+                <thead>
+                    <tr>
+                        <th>IMEI</th>
+                        <th>Setor</th>
+                        <th>Status</th>
+                        <th>Data de Adição</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pdaList">
+                    <!-- As linhas serão inseridas dinamicamente via JavaScript -->
+                </tbody>
+            </table>
+            <div id="noData" class="no-data">Nenhum PDA cadastrado. Adicione o primeiro!</div>
+            <div id="noResults" class="no-results" style="display: none;">Nenhum resultado encontrado para o IMEI digitado.</div>
+        </section>
+
+        <!-- Rodapé -->
+        <footer>
+            <p>&copy; 2025 SIC - Sistema de Identificação de Coletores CDC. Todos os direitos reservados.</p>
+            <p>Versão 1.0 | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a></p>
+        </footer>
+    </div>
+
+    <!-- Modal para edição de PDA -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Editar PDA</h2>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editImei">IMEI:</label>
+                    <input type="text" id="editImei" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editSetor">Setor:</label>
+                    <select id="editSetor" required>
+                        <option value="Descarregamento">Descarregamento</option>
+                        <option value="Inbound">Inbound</option>
+                        <option value="Consolidação">Consolidação</option>
+                        <option value="Rejeito">Rejeito</option>
+                        <option value="Expedição">Expedição</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Status:</label>
+                    <select id="editStatus" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                        <option value="Em Manutenção">Em Manutenção</option>
+                        <option value="Quebrado">Quebrado</option>
+                    </select>
+                </div>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar funções do bd.js
+        import { checkCredentials, loadPDAs, savePDA, updatePDA, deletePDA, onPDAsChange } from './bd.js';
+
+        // Chave para localStorage (apenas para login)
+        const LOGIN_KEY = 'loggedIn';
+
+        // Função para validar IMEI único em tempo real
+        async function validateIMEI(imei) {
+            const pdas = await loadPDAs();
+            const isDuplicate = pdas.some(pda => pda.imei === imei);
+            const errorEl = document.getElementById('imeiError');
+            const validEl = document.getElementById('imeiValid');
+            const inputEl = document.getElementById('imei');
+            const addBtn = document.getElementById('addBtn');
+
+            if (imei.length === 15 && /^\d{15}$/.test(imei)) {
+                if (isDuplicate) {
+                    inputEl.classList.add('error');
+                    errorEl.style.display = 'block';
+                    validEl.style.display = 'none';
+                    addBtn.disabled = true;
+                } else {
+                    inputEl.classList.remove('error');
+                    errorEl.style.display = 'none';
+                    validEl.style.display = 'block';
+                    addBtn.disabled = false;
+                }
+            } else {
+                inputEl.classList.remove('error');
+                errorEl.style.display = 'none';
+                validEl.style.display = 'none';
+                addBtn.disabled = true;
+            }
+        }
+
+        // Verificar login ao carregar
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem(LOGIN_KEY) === 'true';
+            const loginInputs = document.querySelectorAll('#username, #password, #loginForm button[type="submit"]');
+            loginInputs.forEach(el => el.style.display = isLoggedIn ? 'none' : 'block');
+            document.getElementById('logoutBtn').style.display = isLoggedIn ? 'block' : 'none';
+            if (isLoggedIn) {
+                document.querySelector('#loginSection').style.justifyContent = 'flex-end';
+            }
+            updateTable();
+        }
+
+        // Event listener para login
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (checkCredentials(username, password)) {
+                localStorage.setItem(LOGIN_KEY, 'true');
+                checkLogin();
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            } else {
+                alert('Usuário ou senha incorretos!');
+            }
+        });
+
+        // Event listener para logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem(LOGIN_KEY);
+            checkLogin();
+        });
+
+        // Função para renderizar a tabela
+        function renderTable(pdasToRender) {
+            const tbody = document.getElementById('pdaList');
+            const noData = document.getElementById('noData');
+            const noResults = document.getElementById('noResults');
+            const isLoggedIn = localStorage.getItem(LOGIN_KEY) === 'true';
+
+            if (pdasToRender.length === 0) {
+                tbody.innerHTML = '';
+                if (document.getElementById('searchImei').value.trim() === '') {
+                    noData.style.display = 'block';
+                    noResults.style.display = 'none';
+                } else {
+                    noData.style.display = 'none';
+                    noResults.style.display = 'block';
+                }
+                return;
+            }
+
+            noData.style.display = 'none';
+            noResults.style.display = 'none';
+            tbody.innerHTML = pdasToRender.map(pda => `
+                <tr>
+                    <td>${pda.imei}</td>
+                    <td>${pda.setor}</td>
+                    <td>${pda.status}</td>
+                    <td>${new Date(pda.addedDate).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        ${isLoggedIn ? `<button class="edit-btn" data-imei="${pda.imei}">Editar</button>` : ''}
+                        ${isLoggedIn ? `<button class="delete-btn" data-imei="${pda.imei}">Excluir</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+
+            // Adicionar event listeners para os botões
+            if (isLoggedIn) {
+                const editButtons = tbody.querySelectorAll('.edit-btn');
+                editButtons.forEach(btn => {
+                    btn.addEventListener('click', () => openEditModal(btn.dataset.imei));
+                });
+
+                const deleteButtons = tbody.querySelectorAll('.delete-btn');
+                deleteButtons.forEach(btn => {
+                    btn.addEventListener('click', () => deletePDAByImei(btn.dataset.imei));
+                });
+            }
+        }
+
+        // Função para atualizar a tabela com filtro
+        async function updateTable() {
+            const searchTerm = document.getElementById('searchImei').value.trim().toLowerCase();
+            const allPDAs = await loadPDAs();
+            let pdasToRender = allPDAs;
+
+            if (searchTerm !== '') {
+                pdasToRender = allPDAs.filter(pda => pda.imei.toLowerCase().includes(searchTerm));
+            }
+
+            renderTable(pdasToRender);
+        }
+
+        // Escutar mudanças em tempo real
+        onPDAsChange((pdas) => {
+            const searchTerm = document.getElementById('searchImei').value.trim().toLowerCase();
+            let pdasToRender = pdas;
+            if (searchTerm !== '') {
+                pdasToRender = pdas.filter(pda => pda.imei.toLowerCase().includes(searchTerm));
+            }
+            renderTable(pdasToRender);
+        });
+
+        // Função para adicionar PDA
+        async function addPDA(imei, setor, status) {
+            const success = await savePDA(imei, setor, status);
+            if (!success) {
+                alert('IMEI já cadastrado! Use um IMEI único.');
+                return false;
+            }
+            document.getElementById('pdaForm').reset();
+            document.getElementById('imeiValid').style.display = 'none';
+            document.getElementById('addBtn').disabled = false;
+            return true;
+        }
+
+        // Função para excluir PDA
+        async function deletePDAByImei(imeiToDelete) {
+            if (confirm('Tem certeza que deseja excluir este PDA?')) {
+                await deletePDA(imeiToDelete);
+            }
+        }
+
+        // Função para abrir modal de edição
+        async function openEditModal(imei) {
+            const pdas = await loadPDAs();
+            const pda = pdas.find(p => p.imei === imei);
+            if (pda) {
+                document.getElementById('editImei').value = pda.imei;
+                document.getElementById('editSetor').value = pda.setor;
+                document.getElementById('editStatus').value = pda.status;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        }
+
+        // Função para atualizar PDA
+        async function updatePDAHandler(imei, setor, status) {
+            await updatePDA(imei, setor, status);
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Event listener para formulário de adição
+        document.getElementById('pdaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const imei = document.getElementById('imei').value.trim();
+            const setor = document.getElementById('setor').value;
+            const status = document.getElementById('status').value;
+            if (imei && setor && status) {
+                await addPDA(imei, setor, status);
+            }
+        });
+
+        // Validação em tempo real para IMEI
+        document.getElementById('imei').addEventListener('input', async function() {
+            const imei = this.value.trim();
+            await validateIMEI(imei);
+        });
+
+        // Validação ao sair do campo
+        document.getElementById('imei').addEventListener('blur', function() {
+            if (this.value.length !== 15) {
+                document.getElementById('imeiValid').style.display = 'none';
+                document.getElementById('imeiError').style.display = 'none';
+                document.getElementById('addBtn').disabled = true;
+            }
+        });
+
+        // Event listener para busca
+        document.getElementById('searchImei').addEventListener('input', updateTable);
+
+        // Event listeners para modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('editModal').style.display = 'none';
+        });
+
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const imei = document.getElementById('editImei').value;
+            const setor = document.getElementById('editSetor').value;
+            const status = document.getElementById('editStatus').value;
+            if (setor && status) {
+                await updatePDAHandler(imei, setor, status);
+            }
+        });
+
+        // Clique fora do modal fecha
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('editModal')) {
+                document.getElementById('editModal').style.display = 'none';
+            }
+        });
+
+        // Inicialização
+        checkLogin();
+    </script>
+</body>
+</html>
