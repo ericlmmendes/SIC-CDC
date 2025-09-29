@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Identificação de Coletores de Rejeito</title>
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
     <style>
         /* Estilos CSS mantidos exatamente como fornecidos */
         body {
@@ -432,6 +433,7 @@
                 <div class="form-group">
                     <label for="imei">IMEI (obrigatório, único):</label>
                     <input type="text" id="imei" required pattern="[0-9]{15}" title="IMEI deve ter 15 dígitos numéricos" maxlength="15">
+                    <button id="scanAddBtn" type="button">Escanear IMEI</button>
                     <div class="error-message" id="imeiError">IMEI já cadastrado! Use um IMEI único.</div>
                     <div class="valid-message" id="imeiValid">IMEI válido e disponível.</div>
                 </div>
@@ -468,6 +470,7 @@
             <div class="search-group">
                 <label for="searchImei">Buscar por IMEI:</label>
                 <input type="text" id="searchImei" placeholder="Digite o IMEI para buscar..." maxlength="15">
+                <button id="scanSearchBtn" type="button">Escanear IMEI</button>
             </div>
             
             <table id="pdaTable">
@@ -491,7 +494,7 @@
         <!-- Rodapé -->
         <footer>
             <p>&copy; 2025 SIC - Sistema de Identificação de Coletores CDC. Todos os direitos reservados.</p>
-            <p>Versão 1.0 | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a></p>
+            <p>Versão 1.0 | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a> e <a href="mailto:ericlm.evo@gmail.com">Rafael</a></p>
         </footer>
     </div>
 
@@ -527,6 +530,16 @@
                 </div>
                 <button type="submit">Salvar Alterações</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para escaneamento de código de barras -->
+    <div id="scannerContainer" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" id="closeScan">&times;</span>
+            <h2>Escanear Código de Barras</h2>
+            <video id="video" style="width: 100%; height: auto; border: 1px solid gray;"></video>
+            <button id="stopScan">Parar Escaneamento</button>
         </div>
     </div>
 
@@ -737,7 +750,7 @@
         // Event listener para busca
         document.getElementById('searchImei').addEventListener('input', updateTable);
 
-        // Event listeners para modal
+        // Event listeners para modal de edição
         document.getElementById('closeModal').addEventListener('click', function() {
             document.getElementById('editModal').style.display = 'none';
         });
@@ -752,10 +765,59 @@
             }
         });
 
-        // Clique fora do modal fecha
+        // Clique fora do modal de edição fecha
         window.addEventListener('click', function(e) {
             if (e.target === document.getElementById('editModal')) {
                 document.getElementById('editModal').style.display = 'none';
+            }
+        });
+
+        // Código para escaneamento de IMEI
+        let codeReader;
+        let currentScanTarget = null;
+        const scannerContainer = document.getElementById('scannerContainer');
+        const stopScanBtn = document.getElementById('stopScan');
+        const closeScan = document.getElementById('closeScan');
+
+        function startScan(target) {
+            currentScanTarget = target;
+            scannerContainer.style.display = 'flex';
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                if (result) {
+                    const scannedText = result.text;
+                    if (currentScanTarget === 'add') {
+                        document.getElementById('imei').value = scannedText;
+                        validateIMEI(scannedText);
+                    } else if (currentScanTarget === 'search') {
+                        document.getElementById('searchImei').value = scannedText;
+                        updateTable();
+                    }
+                    stopScan();
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error(err);
+                }
+            }).catch(err => console.error(err));
+        }
+
+        function stopScan() {
+            if (codeReader) {
+                codeReader.reset();
+                codeReader = null;
+            }
+            scannerContainer.style.display = 'none';
+        }
+
+        document.getElementById('scanAddBtn').addEventListener('click', () => startScan('add'));
+        document.getElementById('scanSearchBtn').addEventListener('click', () => startScan('search'));
+        stopScanBtn.addEventListener('click', stopScan);
+        closeScan.addEventListener('click', stopScan);
+
+        // Clique fora do modal de scan fecha
+        scannerContainer.addEventListener('click', (e) => {
+            if (e.target === scannerContainer) {
+                stopScan();
             }
         });
 
