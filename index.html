@@ -4,14 +4,14 @@
     <!-- Configurações básicas da página -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Identificação de Coletores de Rejeito</title>
+    <title>Sistema de Identificação de Coletores CDC</title>
     <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Estilos CSS mantidos exatamente como fornecidos */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f4f7f9 0%, #e2e8f0 100%);
-            color: #333;
+            background: linear-gradient(135deg, #e6effa 0%, #d1e0f5 100%);
+            color: #1f2937;
             margin: 0;
             padding: 20px;
             line-height: 1.6;
@@ -25,7 +25,7 @@
             width: 100%;
             background-color: #fff;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -36,9 +36,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
         header {
-            background: linear-gradient(135deg, #035ef1 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             color: #fff;
-            padding: 30px 20px;
+            padding: 40px 20px;
             text-align: center;
             border-bottom: 4px solid #60a5fa;
             position: relative;
@@ -54,38 +54,41 @@
             opacity: 0.05;
         }
         header img.logo {
-            max-width: 150px;
+            max-width: 160px;
             height: auto;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            margin-bottom: 20px;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
         }
         header h1 {
             margin: 0;
-            font-size: 2.2em;
+            font-size: 2.4em;
             font-weight: 700;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        header h1 i {
+            font-size: 1.2em;
         }
         header p {
             margin: 10px 0 0;
-            font-size: 1.1em;
+            font-size: 1.15em;
             opacity: 0.9;
         }
         .intro {
             padding: 40px 30px;
-            background-color: #f8fafc;
+            background-color: #f9fafc;
             border-bottom: 1px solid #e5e7eb;
         }
         .intro h2 {
             color: #1f2937;
-            font-size: 1.6em;
+            font-size: 1.8em;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        .intro h2::before {
-            content: '📋';
-            font-size: 1.2em;
         }
         .intro p {
             margin: 15px 0;
@@ -104,13 +107,11 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 25px;
-        }
-        .form-section h2::before {
-            content: '➕';
-            font-size: 1.2em;
+            font-size: 1.8em;
         }
         .form-group {
             margin-bottom: 25px;
+            position: relative;
         }
         label {
             display: block;
@@ -120,6 +121,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        label i {
+            color: #3b82f6;
         }
         input, select {
             width: 100%;
@@ -163,6 +167,12 @@
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button i {
+            font-size: 1.1em;
         }
         button:hover:not(:disabled) {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -211,30 +221,44 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 25px;
-        }
-        .table-section h2::before {
-            content: '📊';
-            font-size: 1.2em;
+            font-size: 1.8em;
         }
         .search-group {
             margin-bottom: 30px;
-        }
-        .search-group label {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+        }
+        .search-group label {
+            margin-bottom: 0;
         }
         #searchImei {
             width: 400px;
             max-width: 100%;
         }
+        details {
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        summary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            padding: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        summary i {
+            font-size: 1.1em;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 0;
-            border-radius: 12px;
-            overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         th, td {
@@ -243,11 +267,9 @@
             border-bottom: 1px solid #e5e7eb;
         }
         th {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: #fff;
+            background: #f1f5f9;
+            color: #1f2937;
             font-weight: 600;
-            position: sticky;
-            top: 0;
         }
         tr:nth-child(even) {
             background-color: #f9fafb;
@@ -290,6 +312,7 @@
             width: 90%;
             max-width: 500px;
             animation: modalSlideIn 0.3s ease;
+            position: relative;
         }
         @keyframes modalSlideIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -306,9 +329,28 @@
         .close:hover {
             color: #000;
         }
+        #scannerContainer video {
+            position: relative;
+        }
+        #scannerContainer::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: red;
+            box-shadow: 0 0 10px red;
+            animation: scanLine 2s infinite linear;
+        }
+        @keyframes scanLine {
+            0% { transform: translateY(-50px); }
+            50% { transform: translateY(50px); }
+            100% { transform: translateY(-50px); }
+        }
         #loginSection {
             padding: 20px 30px;
-            background-color: #f9fafb;
+            background-color: #f9fafc;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: flex-end;
@@ -406,21 +448,21 @@
                 <div class="form-group">
                     <input type="password" id="password" placeholder="Senha" required>
                 </div>
-                <button type="submit">Entrar</button>
-                <button type="button" id="logoutBtn" style="display: none;">Sair</button>
+                <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <button type="button" id="logoutBtn" class="logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </form>
         </section>
 
         <!-- Cabeçalho do sistema -->
         <header>
             <img src="./logo.ico" alt="Logo do Sistema" class="logo">
-            <h1>SIC - Sistema de Identificação de Coletores CDC</h1>
+            <h1><i class="fas fa-barcode"></i> SIC - Sistema de Identificação de Coletores CDC</h1>
             <p>Gerencie os PDAs por setor, utilizando IMEI para identificação única.</p>
         </header>
 
         <!-- Seção introdutória -->
         <section class="intro">
-            <h2>Descrição do Sistema</h2>
+            <h2><i class="fas fa-info-circle"></i> Descrição do Sistema</h2>
             <p>Este sistema foi desenvolvido para gerenciar a identificação de coletores da Descarregamento, Inbound, Consolidação, Rejeito, Expedição e Outros, garantindo o controle eficiente dos equipamentos (PDAs) utilizados em cada setor da operação.</p>
             <p>O objetivo é assegurar que todos os equipamentos sejam registrados com base em seu número de IMEI, permitindo a rastreabilidade e a responsabilização por setor. Isso reduz divergências operacionais e promove o zelo pelos equipamentos, com informações compartilhadas entre turnos.</p>
             <p><strong>Setores disponíveis:</strong> Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Outros.</p>
@@ -428,17 +470,19 @@
 
         <!-- Formulário para adicionar um novo PDA -->
         <section class="form-section">
-            <h2>Adicionar Novo PDA</h2>
+            <h2><i class="fas fa-plus-circle"></i> Adicionar Novo PDA</h2>
             <form id="pdaForm">
                 <div class="form-group">
-                    <label for="imei">IMEI (obrigatório, único):</label>
-                    <input type="text" id="imei" required pattern="[0-9]{15}" title="IMEI deve ter 15 dígitos numéricos" maxlength="15">
-                    <button id="scanAddBtn" type="button">Escanear IMEI</button>
+                    <label for="imei"><i class="fas fa-barcode"></i> IMEI (obrigatório, único):</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="imei" required pattern="[0-9]{15}" title="IMEI deve ter 15 dígitos numéricos" maxlength="15">
+                        <button id="scanAddBtn" type="button"><i class="fas fa-camera"></i> Escanear</button>
+                    </div>
                     <div class="error-message" id="imeiError">IMEI já cadastrado! Use um IMEI único.</div>
                     <div class="valid-message" id="imeiValid">IMEI válido e disponível.</div>
                 </div>
                 <div class="form-group">
-                    <label for="setor">Setor:</label>
+                    <label for="setor"><i class="fas fa-building"></i> Setor:</label>
                     <select id="setor" required>
                         <option value="">Selecione o setor</option>
                         <option value="Descarregamento">Descarregamento</option>
@@ -450,7 +494,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="status">Status:</label>
+                    <label for="status"><i class="fas fa-cog"></i> Status:</label>
                     <select id="status" required>
                         <option value="Ativo">Ativo</option>
                         <option value="Inativo">Inativo</option>
@@ -458,35 +502,22 @@
                         <option value="Quebrado">Quebrado</option>
                     </select>
                 </div>
-                <button type="submit" id="addBtn">Adicionar PDA</button>
+                <button type="submit" id="addBtn"><i class="fas fa-plus"></i> Adicionar PDA</button>
             </form>
         </section>
 
         <!-- Seção da tabela para listar PDAs -->
         <section class="table-section">
-            <h2>Lista de PDAs Identificados</h2>
+            <h2><i class="fas fa-list"></i> Lista de PDAs Identificados</h2>
             
             <!-- Campo de busca por IMEI -->
             <div class="search-group">
-                <label for="searchImei">Buscar por IMEI:</label>
+                <label for="searchImei"><i class="fas fa-search"></i> Buscar por IMEI:</label>
                 <input type="text" id="searchImei" placeholder="Digite o IMEI para buscar..." maxlength="15">
-                <button id="scanSearchBtn" type="button">Escanear IMEI</button>
+                <button id="scanSearchBtn" type="button"><i class="fas fa-camera"></i> Escanear</button>
             </div>
             
-            <table id="pdaTable">
-                <thead>
-                    <tr>
-                        <th>IMEI</th>
-                        <th>Setor</th>
-                        <th>Status</th>
-                        <th>Data de Adição</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="pdaList">
-                    <!-- As linhas serão inseridas dinamicamente via JavaScript -->
-                </tbody>
-            </table>
+            <div id="pdaList"></div>
             <div id="noData" class="no-data">Nenhum PDA cadastrado. Adicione o primeiro!</div>
             <div id="noResults" class="no-results" style="display: none;">Nenhum resultado encontrado para o IMEI digitado.</div>
         </section>
@@ -494,7 +525,7 @@
         <!-- Rodapé -->
         <footer>
             <p>&copy; 2025 SIC - Sistema de Identificação de Coletores CDC. Todos os direitos reservados.</p>
-            <p>Versão 1.0 | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a> e <a href="mailto:ericlm.evo@gmail.com">Rafael</a></p>
+            <p><a href="about.html">Sobre o Sistema</a> | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a> e <a href="mailto:ericlm.evo@gmail.com">Rafael</a></p>
         </footer>
     </div>
 
@@ -502,14 +533,14 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeModal">&times;</span>
-            <h2>Editar PDA</h2>
+            <h2><i class="fas fa-edit"></i> Editar PDA</h2>
             <form id="editForm">
                 <div class="form-group">
-                    <label for="editImei">IMEI:</label>
+                    <label for="editImei"><i class="fas fa-barcode"></i> IMEI:</label>
                     <input type="text" id="editImei" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="editSetor">Setor:</label>
+                    <label for="editSetor"><i class="fas fa-building"></i> Setor:</label>
                     <select id="editSetor" required>
                         <option value="Descarregamento">Descarregamento</option>
                         <option value="Inbound">Inbound</option>
@@ -520,7 +551,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editStatus">Status:</label>
+                    <label for="editStatus"><i class="fas fa-cog"></i> Status:</label>
                     <select id="editStatus" required>
                         <option value="Ativo">Ativo</option>
                         <option value="Inativo">Inativo</option>
@@ -528,7 +559,7 @@
                         <option value="Quebrado">Quebrado</option>
                     </select>
                 </div>
-                <button type="submit">Salvar Alterações</button>
+                <button type="submit"><i class="fas fa-save"></i> Salvar Alterações</button>
             </form>
         </div>
     </div>
@@ -537,9 +568,11 @@
     <div id="scannerContainer" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close" id="closeScan">&times;</span>
-            <h2>Escanear Código de Barras</h2>
-            <video id="video" style="width: 100%; height: auto; border: 1px solid gray;"></video>
-            <button id="stopScan">Parar Escaneamento</button>
+            <h2><i class="fas fa-camera"></i> Escanear Código de Barras</h2>
+            <div style="position: relative;">
+                <video id="video" style="width: 100%; height: auto; border: 1px solid gray;"></video>
+            </div>
+            <button id="stopScan"><i class="fas fa-stop"></i> Parar Escaneamento</button>
         </div>
     </div>
 
@@ -549,6 +582,7 @@
 
         // Chave para localStorage (apenas para login)
         const LOGIN_KEY = 'loggedIn';
+        const sectors = ['Descarregamento', 'Inbound', 'Consolidação', 'Rejeito', 'Expedição', 'Outros'];
 
         // Função para validar IMEI único em tempo real
         async function validateIMEI(imei) {
@@ -612,15 +646,15 @@
             checkLogin();
         });
 
-        // Função para renderizar a tabela
+        // Função para renderizar a tabela agrupada por setor
         function renderTable(pdasToRender) {
-            const tbody = document.getElementById('pdaList');
+            const pdaList = document.getElementById('pdaList');
             const noData = document.getElementById('noData');
             const noResults = document.getElementById('noResults');
             const isLoggedIn = localStorage.getItem(LOGIN_KEY) === 'true';
 
             if (pdasToRender.length === 0) {
-                tbody.innerHTML = '';
+                pdaList.innerHTML = '';
                 if (document.getElementById('searchImei').value.trim() === '') {
                     noData.style.display = 'block';
                     noResults.style.display = 'none';
@@ -633,27 +667,53 @@
 
             noData.style.display = 'none';
             noResults.style.display = 'none';
-            tbody.innerHTML = pdasToRender.map(pda => `
-                <tr>
-                    <td>${pda.imei}</td>
-                    <td>${pda.setor}</td>
-                    <td>${pda.status}</td>
-                    <td>${new Date(pda.addedDate).toLocaleDateString('pt-BR')}</td>
-                    <td>
-                        ${isLoggedIn ? `<button class="edit-btn" data-imei="${pda.imei}">Editar</button>` : ''}
-                        ${isLoggedIn ? `<button class="delete-btn" data-imei="${pda.imei}">Excluir</button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+
+            const groupedPDAs = sectors.reduce((acc, sector) => {
+                acc[sector] = pdasToRender.filter(pda => pda.setor === sector);
+                return acc;
+            }, {});
+
+            pdaList.innerHTML = sectors.map(sector => {
+                const pdas = groupedPDAs[sector];
+                if (pdas.length === 0) return '';
+                return `
+                    <details open>
+                        <summary><i class="fas fa-folder"></i> ${sector} (${pdas.length})</summary>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>IMEI</th>
+                                    <th>Status</th>
+                                    <th>Data de Adição</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pdas.map(pda => `
+                                    <tr>
+                                        <td>${pda.imei}</td>
+                                        <td>${pda.status}</td>
+                                        <td>${new Date(pda.addedDate).toLocaleDateString('pt-BR')}</td>
+                                        <td>
+                                            ${isLoggedIn ? `<button class="edit-btn" data-imei="${pda.imei}"><i class="fas fa-edit"></i> Editar</button>` : ''}
+                                            ${isLoggedIn ? `<button class="delete-btn" data-imei="${pda.imei}"><i class="fas fa-trash"></i> Excluir</button>` : ''}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </details>
+                `;
+            }).join('');
 
             // Adicionar event listeners para os botões
             if (isLoggedIn) {
-                const editButtons = tbody.querySelectorAll('.edit-btn');
+                const editButtons = pdaList.querySelectorAll('.edit-btn');
                 editButtons.forEach(btn => {
                     btn.addEventListener('click', () => openEditModal(btn.dataset.imei));
                 });
 
-                const deleteButtons = tbody.querySelectorAll('.delete-btn');
+                const deleteButtons = pdaList.querySelectorAll('.delete-btn');
                 deleteButtons.forEach(btn => {
                     btn.addEventListener('click', () => deletePDAByImei(btn.dataset.imei));
                 });
@@ -786,14 +846,16 @@
             codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                 if (result) {
                     const scannedText = result.text;
-                    if (currentScanTarget === 'add') {
-                        document.getElementById('imei').value = scannedText;
-                        validateIMEI(scannedText);
-                    } else if (currentScanTarget === 'search') {
-                        document.getElementById('searchImei').value = scannedText;
-                        updateTable();
+                    if (/^\d{15}$/.test(scannedText)) {
+                        if (currentScanTarget === 'add') {
+                            document.getElementById('imei').value = scannedText;
+                            validateIMEI(scannedText);
+                        } else if (currentScanTarget === 'search') {
+                            document.getElementById('searchImei').value = scannedText;
+                            updateTable();
+                        }
+                        stopScan();
                     }
-                    stopScan();
                 }
                 if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.error(err);
