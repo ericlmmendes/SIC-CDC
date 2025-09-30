@@ -1,0 +1,202 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Configurações básicas da página -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Sistema - SIC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e6effa 0%, #d1e0f5 100%);
+            color: #1f2937;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 4px solid #60a5fa;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.05;
+        }
+        header img.logo {
+            max-width: 160px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.4em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        header h1 i {
+            font-size: 1.2em;
+        }
+        .intro {
+            padding: 40px 30px;
+            background-color: #f9fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .intro h2 {
+            color: #1f2937;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .intro p {
+            margin: 15px 0;
+            font-size: 1.05em;
+            color: #4b5563;
+        }
+        .intro strong {
+            color: #1f2937;
+        }
+        footer {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: #fff;
+            padding: 25px;
+            text-align: center;
+            border-top: 4px solid #3b82f6;
+        }
+        footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 12px;
+                margin: 0;
+            }
+            header img.logo {
+                max-width: 120px;
+            }
+            .intro {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header>
+            <img src="./logo.ico" alt="Logo do Sistema" class="logo">
+            <h1><i class="fas fa-barcode"></i> Sobre o Sistema - SIC</h1>
+        </header>
+
+        <!-- Seção introdutória -->
+        <section class="intro">
+            <h2><i class="fas fa-info-circle"></i> Sobre o Sistema</h2>
+            <p>O <strong>Sistema de Identificação de Coletores CDC (SIC)</strong> foi desenvolvido para otimizar a gestão de equipamentos (PDAs) utilizados em diversos setores operacionais, garantindo rastreabilidade e controle eficiente através do número de IMEI único de cada dispositivo.</p>
+            <p>Este sistema permite o cadastro, edição e exclusão de coletores, organizando-os por setores como Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Secundária, Avaria, Dedicados e Outros. Ele foi projetado para reduzir divergências operacionais, promover a responsabilização por setor e facilitar a troca de informações entre turnos.</p>
+            <p><strong>Funcionalidades principais:</strong></p>
+            <ul>
+                <li>Cadastro de PDAs com validação de IMEI único.</li>
+                <li>Escaneamento de códigos de barras para entrada rápida de IMEIs.</li>
+                <li>Gestão de status dos equipamentos (Ativo, Inativo, Em Manutenção, Quebrado).</li>
+                <li>Busca por IMEI e visualização agrupada por setor.</li>
+                <li>Interface amigável e responsiva para uso em diferentes dispositivos.</li>
+            </ul>
+            <p><strong>Desenvolvedores:</strong> O sistema foi criado por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a> e <a href="mailto:ericlm.evo@gmail.com">Rafael</a>, com foco em atender às necessidades operacionais do CDC.</p>
+        </section>
+
+        <!-- Rodapé -->
+        <footer>
+            <p>&copy; 2025 SIC - Sistema de Identificação de Coletores CDC. Todos os direitos reservados.</p>
+            <p><a href="index.html">Voltar ao Sistema</a> | Desenvolvido por <a href="mailto:ericlm.evo@gmail.com">EricLM.EVO</a> e <a href="mailto:ericlm.evo@gmail.com">Rafael</a></p>
+        </footer>
+    </div>
+</body>
+</html>
