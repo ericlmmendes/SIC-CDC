@@ -335,13 +335,18 @@
         #scannerContainer::after {
             content: '';
             position: absolute;
-            top: 20%;
+            top: 50%;
             left: 10%;
             right: 10%;
-            bottom: 20%;
-            border: 2px solid red;
-            background: transparent;
+            height: 2px;
+            background: red;
             box-shadow: 0 0 10px red;
+            animation: scanLine 2s infinite linear;
+        }
+        @keyframes scanLine {
+            0% { transform: translateY(-50px); }
+            50% { transform: translateY(50px); }
+            100% { transform: translateY(-50px); }
         }
         #loginSection {
             padding: 20px 30px;
@@ -853,22 +858,13 @@
             scannerMessage.textContent = 'Iniciando a câmera, por favor aguarde...';
             scannerContainer.style.display = 'flex';
 
+            // Verificar permissão de câmera
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        focusMode: 'continuous'
-                    }
-                });
-                console.log('Stream da câmera obtido:', stream);
-
+                await navigator.mediaDevices.getUserMedia({ video: true });
                 codeReader = new ZXing.BrowserMultiFormatReader();
                 codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                     if (result) {
                         const scannedText = result.text;
-                        console.log('Código escaneado:', scannedText);
                         if (/^\d{15}$/.test(scannedText)) {
                             if (currentScanTarget === 'add') {
                                 document.getElementById('imei').value = scannedText;
@@ -886,23 +882,14 @@
                         console.error('Erro no escaneamento:', err);
                         scannerMessage.textContent = 'Erro ao escanear. Verifique a câmera ou as condições de iluminação.';
                     }
-                }, {
-                    tryHarder: true,
-                    formats: ['code_128', 'ean_13', 'qr_code']
                 }).catch(err => {
                     console.error('Erro ao iniciar o scanner:', err);
-                    scannerMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões ou tente outro navegador.';
+                    scannerMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
                 });
-                scannerMessage.textContent = 'Posicione o código de barras na frente da câmera com boa iluminação. Se não funcionar, insira o IMEI manualmente.';
+                scannerMessage.textContent = 'Posicione o código de barras na frente da câmera com boa iluminação.';
             } catch (err) {
                 console.error('Erro ao acessar a câmera:', err);
-                if (err.name === 'NotAllowedError') {
-                    scannerMessage.textContent = 'Permissão de câmera negada. Ative nas configurações do navegador ou dispositivo.';
-                } else if (err.name === 'NotFoundError') {
-                    scannerMessage.textContent = 'Nenhuma câmera encontrada. Verifique se o dispositivo possui uma câmera funcional.';
-                } else {
-                    scannerMessage.textContent = 'Erro ao acessar a câmera: ' + err.message;
-                }
+                scannerMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
             }
         }
 
