@@ -391,6 +391,12 @@
             color: #60a5fa;
             text-decoration: underline;
         }
+        .scanner-message {
+            color: #4b5563;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+        }
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -463,9 +469,9 @@
         <!-- Seção introdutória -->
         <section class="intro">
             <h2><i class="fas fa-info-circle"></i> Descrição do Sistema</h2>
-            <p>Este sistema foi desenvolvido para gerenciar a identificação de coletores da Descarregamento, Inbound, Consolidação, Rejeito, Expedição e Outros, garantindo o controle eficiente dos equipamentos (PDAs) utilizados em cada setor da operação.</p>
+            <p>Este sistema foi desenvolvido para gerenciar a identificação de coletores da Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Secundária, Avaria, Dedicados e Outros, garantindo o controle eficiente dos equipamentos (PDAs) utilizados em cada setor da operação.</p>
             <p>O objetivo é assegurar que todos os equipamentos sejam registrados com base em seu número de IMEI, permitindo a rastreabilidade e a responsabilização por setor. Isso reduz divergências operacionais e promove o zelo pelos equipamentos, com informações compartilhadas entre turnos.</p>
-            <p><strong>Setores disponíveis:</strong> Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Outros.</p>
+            <p><strong>Setores disponíveis:</strong> Descarregamento, Inbound, Consolidação, Rejeito, Expedição, Secundária, Avaria, Dedicados, Outros.</p>
         </section>
 
         <!-- Formulário para adicionar um novo PDA -->
@@ -490,6 +496,9 @@
                         <option value="Consolidação">Consolidação</option>
                         <option value="Rejeito">Rejeito</option>
                         <option value="Expedição">Expedição</option>
+                        <option value="Secundária">Secundária</option>
+                        <option value="Avaria">Avaria</option>
+                        <option value="Dedicados">Dedicados</option>
                         <option value="Outros">Outros</option>
                     </select>
                 </div>
@@ -547,6 +556,9 @@
                         <option value="Consolidação">Consolidação</option>
                         <option value="Rejeito">Rejeito</option>
                         <option value="Expedição">Expedição</option>
+                        <option value="Secundária">Secundária</option>
+                        <option value="Avaria">Avaria</option>
+                        <option value="Dedicados">Dedicados</option>
                         <option value="Outros">Outros</option>
                     </select>
                 </div>
@@ -572,6 +584,7 @@
             <div style="position: relative;">
                 <video id="video" style="width: 100%; height: auto; border: 1px solid gray;"></video>
             </div>
+            <p class="scanner-message" id="scannerMessage">Posicione o código de barras na frente da câmera com boa iluminação.</p>
             <button id="stopScan"><i class="fas fa-stop"></i> Parar Escaneamento</button>
         </div>
     </div>
@@ -582,7 +595,7 @@
 
         // Chave para localStorage (apenas para login)
         const LOGIN_KEY = 'loggedIn';
-        const sectors = ['Descarregamento', 'Inbound', 'Consolidação', 'Rejeito', 'Expedição', 'Outros'];
+        const sectors = ['Descarregamento', 'Inbound', 'Consolidação', 'Rejeito', 'Expedição', 'Secundária', 'Avaria', 'Dedicados', 'Outros'];
 
         // Função para validar IMEI único em tempo real
         async function validateIMEI(imei) {
@@ -838,29 +851,46 @@
         const scannerContainer = document.getElementById('scannerContainer');
         const stopScanBtn = document.getElementById('stopScan');
         const closeScan = document.getElementById('closeScan');
+        const scannerMessage = document.getElementById('scannerMessage');
 
-        function startScan(target) {
+        async function startScan(target) {
             currentScanTarget = target;
+            scannerMessage.textContent = 'Iniciando a câmera, por favor aguarde...';
             scannerContainer.style.display = 'flex';
-            codeReader = new ZXing.BrowserMultiFormatReader();
-            codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
-                if (result) {
-                    const scannedText = result.text;
-                    if (/^\d{15}$/.test(scannedText)) {
-                        if (currentScanTarget === 'add') {
-                            document.getElementById('imei').value = scannedText;
-                            validateIMEI(scannedText);
-                        } else if (currentScanTarget === 'search') {
-                            document.getElementById('searchImei').value = scannedText;
-                            updateTable();
+
+            // Verificar permissão de câmera
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                    if (result) {
+                        const scannedText = result.text;
+                        if (/^\d{15}$/.test(scannedText)) {
+                            if (currentScanTarget === 'add') {
+                                document.getElementById('imei').value = scannedText;
+                                validateIMEI(scannedText);
+                            } else if (currentScanTarget === 'search') {
+                                document.getElementById('searchImei').value = scannedText;
+                                updateTable();
+                            }
+                            stopScan();
+                        } else {
+                            scannerMessage.textContent = 'Código escaneado não é um IMEI válido (15 dígitos numéricos).';
                         }
-                        stopScan();
                     }
-                }
-                if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.error(err);
-                }
-            }).catch(err => console.error(err));
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error('Erro no escaneamento:', err);
+                        scannerMessage.textContent = 'Erro ao escanear. Verifique a câmera ou as condições de iluminação.';
+                    }
+                }).catch(err => {
+                    console.error('Erro ao iniciar o scanner:', err);
+                    scannerMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
+                });
+                scannerMessage.textContent = 'Posicione o código de barras na frente da câmera com boa iluminação.';
+            } catch (err) {
+                console.error('Erro ao acessar a câmera:', err);
+                scannerMessage.textContent = 'Não foi possível acessar a câmera. Verifique as permissões.';
+            }
         }
 
         function stopScan() {
@@ -869,6 +899,7 @@
                 codeReader = null;
             }
             scannerContainer.style.display = 'none';
+            scannerMessage.textContent = 'Posicione o código de barras na frente da câmera com boa iluminação.';
         }
 
         document.getElementById('scanAddBtn').addEventListener('click', () => startScan('add'));
